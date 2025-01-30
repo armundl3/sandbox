@@ -5,3 +5,5 @@ torchaudio==2.5.1
 torchvision==0.20.1
 vllm==0.6.6.post1
 uvicorn>=0.15.0
+numpy==1.26.4
+
