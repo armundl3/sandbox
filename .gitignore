@@ -1,1 +1,28 @@
-*.ipynb
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.pyc
+build/
+dist/
+*.egg-info/
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# System
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log 
