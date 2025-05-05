@@ -23,6 +23,10 @@ ENV/
 *.swp
 *.swo
 
+# Jupyter Notebook
+**/.ipynb_checkpoints/*
+**/.ipynb_checkpoints/
+
 # System
 .DS_Store
 Thumbs.db
