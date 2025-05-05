@@ -1,4 +1,4 @@
-FROM python:3.11-slim
+FROM python:3.10.7-slim
 
 WORKDIR /app
 
@@ -7,8 +7,8 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Poetry v2.0.1 and disable venv creation
-ENV POETRY_VERSION=2.0.1 \
+# Install Poetry and disable venv creation
+ENV POETRY_VERSION=2.1.3 \
     POETRY_VIRTUALENVS_CREATE=false \
     POETRY_CACHE_DIR='/var/cache/pypoetry'
 RUN pip install "poetry==$POETRY_VERSION"

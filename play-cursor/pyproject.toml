@@ -1,18 +1,18 @@
-[project]
+[tool.poetry]
 name = "play-cursor"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "armundl3",email = "armundle@gmail.com"}
-]
+authors = ["armundl3 <armundle@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.11"
-dependencies = [
-    "fastapi (>=0.115.12,<0.116.0)",
-    "uvicorn (>=0.34.2,<0.35.0)",
-    "gradio (>=5.29.0,<6.0.0)"
-]
 
+[tool.poetry.dependencies]
+python = "3.10.7"
+fastapi = "0.115.12"
+uvicorn = "0.34.2"
+gradio = "5.29.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "7.4.4"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
