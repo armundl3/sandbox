@@ -1,9 +1,14 @@
+from dotenv import load_dotenv
+load_dotenv()
 import os
 import logging
 from fastapi import FastAPI
 import gradio as gr
 import requests
 from fastapi.responses import JSONResponse
+from youtubesearchpython import VideosSearch
+import random
+from bs4 import BeautifulSoup
 
 # Configure logging
 logging.basicConfig(
@@ -14,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
 OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "mistral")
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
+if not YOUTUBE_API_KEY:
+    raise RuntimeError("YOUTUBE_API_KEY environment variable not set!")
 
 logger.info(f"Starting Play Cursor API with Ollama model: {OLLAMA_MODEL}")
 
@@ -49,10 +57,31 @@ def get_ollama_response(prompt):
         logger.error(f"Error communicating with Ollama: {e}")
         return "(Could not get a response from Ollama)"
 
-def greet_haiku_fact(name, topic):
+def get_random_youtube_video(topic):
+    try:
+        logger.info(f"Searching YouTube for topic: {topic}")
+        search_url = (
+            "https://www.googleapis.com/youtube/v3/search"
+            f"?part=snippet&type=video&maxResults=10&q={topic}&key={YOUTUBE_API_KEY}"
+        )
+        response = requests.get(search_url)
+        data = response.json()
+        items = data.get("items", [])
+        if items:
+            video = random.choice(items)
+            video_id = video["id"]["videoId"]
+            embed_html = f'<iframe width="560" height="315" src="https://www.youtube.com/embed/{video_id}" frameborder="0" allowfullscreen></iframe>'
+            return embed_html
+        return "<p>No related YouTube video found.</p>"
+    except Exception as e:
+        logger.error(f"Error searching YouTube: {e}")
+        return "<p>Error fetching YouTube video.</p>"
+
+def greet_haiku_fact_video(name, topic):
     greeting = f"Hello {name}!"
     haiku = ""
     fact = ""
+    video_html = ""
     if topic:
         haiku_prompt = (
             f"Give me a random fact about {topic} in the form of a haiku. "
@@ -63,17 +92,14 @@ def greet_haiku_fact(name, topic):
         )
         haiku = get_ollama_response(haiku_prompt)
         fact = get_ollama_response(fact_prompt)
+        video_html = get_random_youtube_video(topic)
     else:
         logger.debug("No topic provided by user.")
-    return greeting, haiku, fact
+    return greeting, haiku, fact, video_html
 
 # Gradio interface
-theme = gr.themes.Default().set(
-    button_primary_background_fill="#808000",
-    button_primary_background_fill_hover="#6b6b00",  # slightly darker on hover
-    button_primary_text_color="white"
-)
-with gr.Blocks(theme=theme) as demo:
+# Use Soft theme
+with gr.Blocks(theme=gr.themes.Soft()) as demo:
     gr.Markdown(f"# Hello World + Haiku Facts Generator with Ollama + {OLLAMA_MODEL}")
     name = gr.Textbox(label="Enter your name")
     topic = gr.Textbox(label="Enter a topic to get a random fact")
@@ -82,14 +108,16 @@ with gr.Blocks(theme=theme) as demo:
     with gr.Row():
         haiku_out = gr.Textbox(label="Snack Facts (Haiku)")
         fact_out = gr.Textbox(label="Random Fact")
+    gr.Markdown("### YouTube Video Preview")
+    video_out = gr.HTML()
 
     def on_submit(name, topic):
         logger.info(f"User submitted: name='{name}', topic='{topic}'")
-        return greet_haiku_fact(name, topic)
+        return greet_haiku_fact_video(name, topic)
 
-    submit_btn.click(on_submit, inputs=[name, topic], outputs=[greeting_out, haiku_out, fact_out])
-    name.submit(on_submit, inputs=[name, topic], outputs=[greeting_out, haiku_out, fact_out])
-    topic.submit(on_submit, inputs=[name, topic], outputs=[greeting_out, haiku_out, fact_out])
+    submit_btn.click(on_submit, inputs=[name, topic], outputs=[greeting_out, haiku_out, fact_out, video_out])
+    name.submit(on_submit, inputs=[name, topic], outputs=[greeting_out, haiku_out, fact_out, video_out])
+    topic.submit(on_submit, inputs=[name, topic], outputs=[greeting_out, haiku_out, fact_out, video_out])
 
 # Mount Gradio at a subpath, e.g., "/ui"
 logger.info("Mounting Gradio app at /ui")

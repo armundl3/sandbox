@@ -25,5 +25,8 @@ COPY . .
 # Expose the port the app runs on
 EXPOSE 8000
 
+# Set environment variable for YouTube API key (can be overridden at runtime)
+ENV YOUTUBE_API_KEY=""
+
 # Command to run the application
 CMD ["poetry", "run", "uvicorn", "play_cursor.main:app", "--host", "0.0.0.0", "--port", "8000"]
