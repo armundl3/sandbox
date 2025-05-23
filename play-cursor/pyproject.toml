@@ -6,13 +6,18 @@ authors = ["armundl3 <armundle@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "3.10.7"
+python = ">=3.10.7,<3.12"
 fastapi = "0.115.12"
 uvicorn = "0.34.2"
 gradio = "5.29.0"
+requests = "^2.32.3"
+typer = {extras = ["all"], version = "^0.12.3"}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.4.4"
+
+[tool.poetry.scripts]
+play-cursor = "cli:app"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
